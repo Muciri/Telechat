@@ -18,20 +18,17 @@ def tratar_cliente(con, cliente):
                 print(f"Cliente {cliente} desconectou.")
                 break
 
-            print(f"{cliente} enviou: {msg.decode('utf-8')}")
+            # print(f"{cliente} enviou: {msg.decode('utf-8')}")
             
             msg_processada = msg.decode('utf-8')
-            if msg_processada.startswith('cliente'):
-                resposta = 'cliente recebido'
-            if msg_processada == 'GET':
-                resposta = 'GET RECEBIDO'
-            elif msg_processada == 'POST':
-                resposta = 'POST RECEBIDO'
+            
+            if msg_processada.startswith('cliente'): # Reconhecimento do cliente no servidor
+                print(f"{msg.decode('utf-8')} - {cliente}") 
             else:
                 resposta = 'Mensagem recebida!'
-            
-            # Enviar uma resposta ao cliente
-            con.sendall(resposta.encode('utf-8'))
+                print(f"{cliente} {msg.decode('utf-8')}")
+                
+                con.sendall(resposta.encode('utf-8')) # Enviar uma resposta ao cliente confirmando a mensagem
         
         except Exception as e:
             print(f"Ocorreu um erro com o cliente {cliente}: {e}")
