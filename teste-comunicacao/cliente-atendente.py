@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import socket
 import threading
 import time
@@ -33,7 +34,8 @@ thread_receber = threading.Thread(target=receber_mensagens, daemon=True)
 thread_receber.start()
 
 while True:
-    msg = input("--> ")
+    # msg = input("--> ")
+    msg = input(" ")
     if msg.upper() == "QUIT":
         break
     sock.sendall(f'({cliente}) enviou: {msg}'.encode('utf-8'))
