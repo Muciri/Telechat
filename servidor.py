@@ -1,61 +1,69 @@
 #!/usr/bin/env python3
-import os
 import socket
 import threading
 
-TAM_MSG = 1024         # Tamanho do bloco de mensagem
-HOST = '0.0.0.0'       # IP de alguma interface do Servidor
-PORT = 40000           # Porta que o Servidor escuta
+TAM_MSG = 1024
+HOST = '0.0.0.0'
+PORT = 40000
+
+clientes_conectados = []
+lock = threading.Lock()
 
 def tratar_cliente(con, cliente):
     """ Função para tratar a comunicação com um cliente específico """
+    global clientes_conectados
+
     print(f"Conexão com o cliente {cliente} estabelecida.")
+
+    with lock:
+        clientes_conectados.append(con)
     
-    while True:
-        try:
+    try:
+        while True:
             # Receber dados do cliente
             msg = con.recv(TAM_MSG)
             if not msg:
                 print(f"Cliente {cliente} desconectou.")
                 break
 
-            # print(f"{cliente} enviou: {msg.decode('utf-8')}")
-            
             msg_processada = msg.decode('utf-8')
-            
-            if msg_processada.startswith('cliente'): # Reconhecimento do cliente no servidor
-                print(f"{msg.decode('utf-8')} - {cliente}") 
+
+            # if msg_processada.startswith('cliente'):  # Reconhecimento do cliente no servidor
+            #     print(f"{msg_processada} - {cliente}") 
+            if msg_processada.startswith('cliente') or msg_processada.startswith('atendente'):  # Reconhecimento do cliente no servidor
+                print(f"{msg_processada} - {cliente}") 
             else:
                 resposta = 'Mensagem recebida!'
-                print(f"{cliente} {msg.decode('utf-8')}")
-                
-                con.sendall(resposta.encode('utf-8')) # Enviar uma resposta ao cliente confirmando a mensagem
-        
-        except Exception as e:
-            print(f"Ocorreu um erro com o cliente {cliente}: {e}")
-            break
+                print(f"{cliente} {msg_processada}")
+                con.sendall(resposta.encode('utf-8'))  # Confirmação ao cliente
+            
+            # Encaminhar mensagem para os outros clientes conectados
+            with lock:
+                for c in clientes_conectados:
+                    if c != con:  # Evitar eco para o próprio remetente
+                        c.sendall(f"{cliente}: {msg_processada}".encode('utf-8'))
     
-    # Fechar a conexão com o cliente
-    con.close()
-    print(f"Conexão com o cliente {cliente} fechada.")
+    except Exception as e:
+        print(f"Ocorreu um erro com o cliente {cliente}: {e}")
+
+    finally:
+        with lock:
+            if con in clientes_conectados:  # Verifica antes de remover
+                clientes_conectados.remove(con)
+        con.close()
+        print(f"Conexão com {cliente} encerrada.")
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-serv = (HOST, PORT)
-sock.bind(serv)
+sock.bind((HOST, PORT))
 sock.listen(50)
 
 print("Servidor aguardando conexões...")
 
 while True:
     try:
-        # Aceitar uma conexão de cliente
         con, cliente = sock.accept()
-        
-        # Criar uma nova thread para tratar o cliente
-        thread = threading.Thread(target=tratar_cliente, args=(con, cliente))
-        thread.daemon = True  # Tornar a thread como "daemon", ou seja, ela será encerrada quando o programa principal terminar.
+        thread = threading.Thread(target=tratar_cliente, args=(con, cliente), daemon=True)
         thread.start()
-        
     except Exception as e:
         print(f"Ocorreu um erro: {e}")
         break
