@@ -3,12 +3,22 @@ import socket
 import threading
 import time
 
-TAM_MSG = 1024      # Tamanho do bloco de mensagem
-HOST = '127.0.0.1'  # IP do Servidor
-PORT = 40000        # Porta que o Servidor escuta
-
-
+#cadastro do atendente
 cliente = input('qual seu nome completo? ')
+
+#verificação da máquina de destino (IP onde o servidor está rodando)
+while True:
+    destino = input('qual o IP da máquina de Destino? (digite 0 caso seja a própria máquina) ')
+    if not destino == '0' and not destino.count('.') == 3:
+        print('destino inválido!')
+        continue
+    break
+
+#parâmetros da conexão
+TAM_MSG = 1024      # Tamanho do bloco de mensagem
+# HOST = '127.0.0.1'  # IP do Servidor
+HOST = '127.0.0.1' if destino == '0' else destino  # IP do Servidor
+PORT = 40000        # Porta que o Servidor escuta
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.connect((HOST, PORT))
@@ -42,6 +52,20 @@ while True:
 
 sock.close()
 print("Desconectado do servidor.")
+
+# TAM_MSG = 1024      # Tamanho do bloco de mensagem
+# HOST = '127.0.0.1'  # IP do Servidor
+# PORT = 40000        # Porta que o Servidor escuta
+
+
+# cliente = input('qual seu nome completo? ')
+
+# sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# sock.connect((HOST, PORT))
+
+# sock.sendall((f'atendente: {cliente}').encode('utf-8')) #envia para o servidor o nome do cliente e seu tipo
+
+# print('conectado ao servidor (digite "QUIT" para sair)')
 
 # while True:
 #     # Enviar uma mensagem para o servidor
