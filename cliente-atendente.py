@@ -41,6 +41,7 @@ def receber_mensagens():
 thread_receber = threading.Thread(target=receber_mensagens, daemon=True)
 thread_receber.start()
 
+#loop para o envio de mensagens para o servidor
 while True:
     msg = input(" ")
     if msg.upper() == "QUIT":

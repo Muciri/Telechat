@@ -5,7 +5,7 @@ import threading
 #cadastro do consumidor
 cliente = input('qual seu nome completo? ')
 while True:
-    tipo = input('você é normal[N]? ou preferencial[P] ') #bom adicionar uma verificação robusta depois
+    tipo = input('você é normal[N]? ou preferencial[P] ')
     if not tipo.upper() == 'N' and not tipo.upper() == 'P':
         print('destino inválido!')
         continue
@@ -46,6 +46,7 @@ def receber_mensagens():
 thread_receber = threading.Thread(target=receber_mensagens, daemon=True)
 thread_receber.start()
 
+#loop para o envio de mensagens para o servidor
 while True:
     msg = input(" ")
     if msg.upper() == "QUIT":

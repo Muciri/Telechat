@@ -28,8 +28,6 @@ def tratar_cliente(con, cliente):
 
             msg_processada = msg.decode('utf-8')
 
-            # if msg_processada.startswith('cliente'):  # Reconhecimento do cliente no servidor
-            #     print(f"{msg_processada} - {cliente}") 
             if msg_processada.startswith('cliente') or msg_processada.startswith('atendente'):  # Reconhecimento do cliente no servidor
                 print(f"{msg_processada} - {cliente}") 
             else:

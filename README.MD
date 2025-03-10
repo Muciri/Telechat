@@ -1,12 +1,12 @@
 # CHAT DE ATENDIMENTO AO CLIENTE
 
-Bem-vindo ao projeto **Chat de Atendimento ao Cliente**, desenvolvido como parte das disciplinas de **Fundamentos de Intercomunicação de Redes de Computadores** e **Estruturas de Dados**. Este sistema visa proporcionar uma comunicação eficiente entre os clientes e o suporte técnico de uma empresa.
+Bem-vindo ao projeto **Chat de Atendimento ao Cliente**. Este sistema visa proporcionar uma comunicação eficiente entre os clientes e o suporte técnico de uma empresa.
 
 ---
 
 ## Disciplinas
 
-- **Fundamentos de Intercomunicação de Redes de Computadores**
+- **Protocolos de Intercomunicação de Redes de Computadores**
 - **Estruturas de Dados**
 
 ---
