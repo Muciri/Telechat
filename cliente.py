@@ -2,14 +2,16 @@
 import socket
 import threading
 
-#cadastro do consumidor
+#cadastro do usuário
 cliente = input('qual seu nome completo? ')
 while True:
-    tipo = input('você é normal[N]? ou preferencial[P] ')
-    if not tipo.upper() == 'N' and not tipo.upper() == 'P':
+    tipo_verificacao = input('você é Consumidor[C]? ou atendente[A] ')
+    if not tipo_verificacao.upper() == 'C' and not tipo_verificacao.upper() == 'A':
         print('destino inválido!')
         continue
     break
+
+tipo = 'consumidor' if tipo_verificacao.upper() == 'C' else 'atendente'
 
 #verificação da máquina de destino (IP onde o servidor está rodando)
 while True:
