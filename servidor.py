@@ -13,7 +13,7 @@ def tratar_cliente(con, cliente):
     """ Função para tratar a comunicação com um cliente específico """
     global clientes_conectados
 
-    print(f"Conexão com o cliente {cliente} estabelecida.")
+    # print(f"Conexão com o cliente {cliente} estabelecida.")    //////VERIFICAR DEPOIS
 
     with lock:
         clientes_conectados.append(con)
@@ -28,18 +28,26 @@ def tratar_cliente(con, cliente):
 
             msg_processada = msg.decode('utf-8')
 
-            if msg_processada.startswith('cliente') or msg_processada.startswith('atendente'):  # Reconhecimento do cliente no servidor
+            if msg_processada.startswith('CONNECT') or msg_processada.startswith('atendente'):  # Reconhecimento do cliente no servidor
                 print(f"{msg_processada} - {cliente}") 
-            else:
-                resposta = 'Mensagem recebida!'
-                print(f"{cliente} {msg_processada}")
+            
+            elif msg_processada.startswith('MSG'):
+                resposta = '+OK Mensagem recebida!'
+                # print(f"{cliente} {msg_processada}")
+                print(f"{msg_processada}")
+                con.sendall(resposta.encode('utf-8'))  # Confirmação ao cliente
+            
+            elif msg_processada.startswith('QUIT'):
+                resposta = '+OK até mais!'
+                print(f"{msg_processada} - {cliente}")
                 con.sendall(resposta.encode('utf-8'))  # Confirmação ao cliente
             
             # Encaminhar mensagem para os outros clientes conectados
             with lock:
                 for c in clientes_conectados:
                     if c != con:  # Evitar eco para o próprio remetente
-                        c.sendall(f"{cliente}: {msg_processada}".encode('utf-8'))
+                        # c.sendall(f"{cliente}: {msg_processada}".encode('utf-8'))
+                        c.sendall(f"{msg_processada}".encode('utf-8'))
     
     except Exception as e:
         print(f"Ocorreu um erro com o cliente {cliente}: {e}")
