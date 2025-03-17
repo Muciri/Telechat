@@ -23,7 +23,7 @@ def tratar_cliente(con, cliente):
             # Receber dados do cliente
             msg = con.recv(TAM_MSG)
             if not msg:
-                print(f"Cliente {cliente} desconectou.")
+                # print(f"Cliente {cliente} desconectou.")
                 break
 
             msg_processada = msg.decode('utf-8')
@@ -50,7 +50,8 @@ def tratar_cliente(con, cliente):
                         c.sendall(f"{msg_processada}".encode('utf-8'))
     
     except Exception as e:
-        print(f"Ocorreu um erro com o cliente {cliente}: {e}")
+        # print(f"Ocorreu um erro com o cliente {cliente}: {e}") ////verificar possíveis excessões depois (o cliente se desconectando gera uma excessão por exemplo)
+        pass
 
     finally:
         with lock:
