@@ -39,7 +39,7 @@ def receber_mensagens():
             msg = sock.recv(TAM_MSG)
             if not msg:
                 break
-            print(f"{msg.decode('utf-8')}\n--> ", end="")
+            print(f"\n{msg.decode('utf-8')}\n--> ", end="")
         except:
             print("\n[Conexão perdida com o servidor]")
             break
