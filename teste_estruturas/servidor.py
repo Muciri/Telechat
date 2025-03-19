@@ -36,13 +36,13 @@ def tratar_cliente(con, cliente):
                 print(f"{msg_processada} - {cliente}") 
             
             elif msg_processada.startswith('MSG'):
-                resposta = '+OK Mensagem recebida!'
+                resposta = '+OK Mensagem recebida!\n'
                 # print(f"{cliente} {msg_processada}")
                 print(f"{msg_processada}")
                 con.sendall(resposta.encode('utf-8'))  # Confirmação ao cliente
             
             elif msg_processada.startswith('QUIT'):
-                resposta = '+OK até mais!'
+                resposta = '+OK ate mais!\n'
                 print(f"{msg_processada} - {cliente}")
                 con.sendall(resposta.encode('utf-8'))  # Confirmação ao cliente
             
@@ -60,7 +60,8 @@ def tratar_cliente(con, cliente):
     finally:
         with lock:
             if con in clientes_conectados:  # Verifica antes de remover
-                clientes_conectados.remove(con)
+                #clientes_conectados.remove(con)
+                clientes_conectados.desenfileirar(con)
         con.close()
         print(f"Conexão com {cliente} encerrada.")
 

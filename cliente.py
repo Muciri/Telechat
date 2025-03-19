@@ -28,7 +28,7 @@ PORT = 40000                                       # Porta que o Servidor escuta
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.connect((HOST, PORT))
 
-sock.sendall((f'CONNECT - {cliente} - {tipo}').encode('utf-8')) #envia para o servidor o nome do cliente e seu tipo
+sock.sendall((f'CONNECT - {cliente} - {tipo}\n').encode('utf-8')) #envia para o servidor o nome do cliente e seu tipo
 
 print('conectado ao servidor (digite "QUIT" para sair)')
 
@@ -39,7 +39,7 @@ def receber_mensagens():
             msg = sock.recv(TAM_MSG)
             if not msg:
                 break
-            print(f"\n{msg.decode('utf-8')}\n--> ", end="")
+            print(f"{msg.decode('utf-8')}\n--> ", end="")
         except:
             print("\n[Conexão perdida com o servidor]")
             break
@@ -52,9 +52,9 @@ thread_receber.start()
 while True:
     msg = input(" ")
     if msg.upper() == "QUIT":
-        sock.sendall(f'QUIT - {cliente}'.encode('utf-8'))
+        sock.sendall(f'QUIT - {cliente}\n'.encode('utf-8'))
         break
-    sock.sendall(f'MSG - {cliente} enviou: {msg}'.encode('utf-8'))
+    sock.sendall(f'MSG - {cliente} enviou: {msg}\n'.encode('utf-8'))
 
 sock.close()
 print("Desconectado do servidor.")
