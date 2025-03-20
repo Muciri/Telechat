@@ -61,7 +61,7 @@ def tratar_cliente(con, cliente):
         with lock:
             if con in clientes_conectados:  # Verifica antes de remover
                 #clientes_conectados.remove(con)
-                clientes_conectados.desenfileirar(con)
+                clientes_conectados.desenfileirar()
         con.close()
         print(f"Conexão com {cliente} encerrada.")
 

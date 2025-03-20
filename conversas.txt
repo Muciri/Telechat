@@ -1,0 +1,6 @@
+CONNECT - mel - consumidor
+MSG - mel enviou: 
+MSG - mel enviou: salve
+MSG - mel enviou: opa
+MSG - mel enviou: aaaaah
+QUIT - mel

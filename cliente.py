@@ -1,6 +1,16 @@
 #!/usr/bin/env python3
 import socket
 import threading
+import subprocess
+import atexit  # Biblioteca para capturar o encerramento do programa
+
+
+def processar_ao_finalizar():
+    """Executa o script de processamento ao finalizar o servidor"""
+    print("\n[!] Servidor finalizado. Processando conversas...")
+    subprocess.run(["python", "processar_conversas.py"])
+
+
 
 #cadastro do usuário
 cliente = input('qual seu nome completo? ')
@@ -56,5 +66,10 @@ while True:
         break
     sock.sendall(f'MSG - {cliente} enviou: {msg}\n'.encode('utf-8'))
 
+#inicia processo ao finalizar a execução do arquivo
+atexit.register(processar_ao_finalizar)
+
 sock.close()
+
+
 print("Desconectado do servidor.")
