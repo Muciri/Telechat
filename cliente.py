@@ -1,14 +1,7 @@
 #!/usr/bin/env python3
 import socket
 import threading
-import subprocess
-import atexit  # Biblioteca para capturar o encerramento do programa
 
-
-def processar_ao_finalizar():
-    """Executa o script de processamento ao finalizar o servidor"""
-    print("\n[!] Servidor finalizado. Processando conversas...")
-    subprocess.run(["python", "processar_conversas.py"])
 
 
 
@@ -23,6 +16,8 @@ while True:
 
 tipo = 'consumidor' if tipo_verificacao.upper() == 'C' else 'atendente'
 
+
+
 #verificação da máquina de destino (IP onde o servidor está rodando)
 while True:
     destino = input('qual o IP da máquina de Destino? (digite 0 caso seja a própria máquina) ')
@@ -30,6 +25,8 @@ while True:
         print('destino inválido!')
         continue
     break
+
+
 
 TAM_MSG = 1024                                     # Tamanho do bloco de mensagem
 HOST = '127.0.0.1' if destino == '0' else destino  # IP do Servidor
@@ -41,6 +38,9 @@ sock.connect((HOST, PORT))
 sock.sendall((f'CONNECT - {cliente} - {tipo}\n').encode('utf-8')) #envia para o servidor o nome do cliente e seu tipo
 
 print('conectado ao servidor (digite "QUIT" para sair)')
+
+print()
+print("Verificar historico: historico <nome_do_cliente>\n\nListar quem ja utilizou o chat: <listar usuarios>" if tipo == 'atendente' else "Bem vindo, em que posso lhe auxiliar?")
 
 def receber_mensagens():
     """ Thread para receber mensagens do servidor continuamente """
@@ -64,10 +64,18 @@ while True:
     if msg.upper() == "QUIT":
         sock.sendall(f'QUIT - {cliente}\n'.encode('utf-8'))
         break
-    sock.sendall(f'MSG - {cliente} enviou: {msg}\n'.encode('utf-8'))
+    elif msg.upper().startswith("HISTORICO"):
+        if len(msg.split(" ", 1)) == 2:
+            sock.sendall(f'HISTORICO - {cliente} - {msg.split(" ", 1)[1]}\n'.encode('utf-8'))
+        else:
+            print("Formato incorreto. O formato esperado é: historico <nome de usuário>")
+    elif msg.upper() == "LISTAR USUARIOS":
+        sock.sendall(f'LISTAR - {cliente} - {msg.split(" ", 1)[1]}\n'.encode('utf-8'))
+        
+    else:
+        sock.sendall(f'MSG - {cliente} enviou: {msg}\n'.encode('utf-8'))
 
-#inicia processo ao finalizar a execução do arquivo
-atexit.register(processar_ao_finalizar)
+
 
 sock.close()
 

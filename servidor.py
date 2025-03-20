@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 import socket
 import threading
-from multiprocessing import Manager
+import time
 from structures.LinearProbingLoadFactor import HashTable
+from structures.PilhaEncadeada import Pilha
 
 TAM_MSG = 1024
 HOST = '0.0.0.0'
@@ -11,21 +12,37 @@ PORT = 40000
 clientes_conectados = []
 lock = threading.Lock()
 rodando = True
+historico_conversas = HashTable() # Armazena sessões por cliente
+clientes = {}  # Dicionário para armazenar {nome: tipo}
 
 
-def salvar_conversa(conversa):
-    """Salva a conversa completa do cliente no arquivo ao desconectar"""# Garante que a escrita no arquivo seja segura
-    with open("conversas.txt", "w", encoding="utf-8") as f:
-            f.write("".join(conversa))
+
+def iniciar_sessao(usuario):
+    """Cria uma nova sessão para o cliente com um identificador único"""
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S")  # ID da sessão
+    if usuario not in historico_conversas:
+        historico_conversas[usuario] = HashTable()
+    historico_conversas[usuario][timestamp] = Pilha()
+    return timestamp
+
+
+def salvar_mensagem(usuario, sessao, mensagem):
+    """Adiciona a mensagem à sessão ativa do usuário"""
+    if usuario in historico_conversas and sessao in historico_conversas[usuario]:
+        historico_conversas[usuario][sessao].empilha(mensagem)
+
+
 
 def tratar_cliente(con, cliente):
     """ Função para tratar a comunicação com um cliente específico """
     global clientes_conectados
-    conversa_cliente = []  # Armazena mensagens da sessão desse cliente
     
     # print(f"Conexão com o cliente {cliente} estabelecida.")    //////VERIFICAR DEPOIS
     with lock:
         clientes_conectados.append(con)
+    
+    usuario = None
+    sessao = None
         
     try:
         while True:
@@ -36,24 +53,73 @@ def tratar_cliente(con, cliente):
                 break
 
             msg_processada = msg.decode('utf-8')
-
-            # Armazena na conversa do cliente
-            conversa_cliente.append(msg_processada)
             
             if msg_processada.startswith('CONNECT') or msg_processada.startswith('atendente'):  # Reconhecimento do cliente no servidor
-                print(f"{msg_processada} - {cliente}") 
+                print(f"{msg_processada} - {cliente}")
+                _, nome, tipo = msg_processada.split(" - ")
+                clientes[nome.strip()] = tipo.strip() #ARMAZENA O TIPO DO CLIENTE   
+ 
+
+                """ Formato esperado: CONNECT - Nome_do_Cliente - Tipo """
+                partes = msg_processada.split(' - ')
+                if len(partes) >= 2:
+                    usuario = partes[1]
+                    sessao = iniciar_sessao(usuario)
+                    print(f"Novo usuário conectado: {usuario} (sessão: {sessao})")
             
             elif msg_processada.startswith('MSG'):
                 resposta = '+OK Mensagem recebida!\n'
                 # print(f"{cliente} {msg_processada}")
-                print(f"{msg_processada}")
+
+                """ Formato esperado: MSG - Nome_do_Cliente enviou: mensagem """
+                partes = msg_processada.split(' enviou: ')
+                if len(partes) == 2 and usuario:
+                    mensagem = partes[1]
+                    salvar_mensagem(usuario, sessao, mensagem)
+                    print(f"{usuario} ({sessao}): {mensagem}")
+
                 con.sendall(resposta.encode('utf-8'))  # Confirmação ao cliente
+                
             
             elif msg_processada.startswith('QUIT'):
                 resposta = '+OK ate mais!\n'
                 print(f"{msg_processada} - {cliente}")
                 con.sendall(resposta.encode('utf-8'))  # Confirmação ao cliente
+
+            elif msg_processada.startswith('HISTORICO - '):
+                _, solicitante, usuario_solicitado = msg_processada.strip().split(" - ")
+
+                 # Verifica se o solicitante é um atendente
+                if clientes.get(solicitante) != "atendente":
+                    con.sendall("ERRO: Apenas atendentes podem acessar o histórico.\n".encode('utf-8'))
+                    continue
+                 # Retorna o histórico se existir
+                if usuario_solicitado in historico_conversas:
+                    resposta = f"Histórico de {usuario_solicitado}:\n"
+                    for sessao, pilha in historico_conversas[usuario_solicitado].items():
+                        resposta += f"\nSessão {sessao}:\n"
+                        for msg in pilha:
+                            resposta += f"{msg}\n"
+                    con.sendall(resposta.encode('utf-8'))
+                else:
+                    con.sendall(f"Nenhum histórico encontrado para {usuario_solicitado}.\n".encode('utf-8'))
             
+            elif msg_processada.startswith("LISTAR"):
+
+                _, solicitante, _ = msg_processada.strip().split(" - ")
+
+                if clientes.get(solicitante) != "atendente":
+                    con.sendall("ERRO: Apenas atendentes podem listar usuários.\n".encode('utf-8'))
+                    continue
+                if not clientes:
+                    con.sendall("ERRO: Não há usuários do chat.\n".encode('utf-8'))
+                    continue
+                else:
+                    resposta = "Lista de usuários que ja usaram o chat\n"
+                    for chave in clientes:
+                        resposta += f"{chave} : {clientes[chave]}\n"
+                    con.sendall(resposta.encode('utf-8'))
+                    
             # Encaminhar mensagem para os outros clientes conectados
             with lock:
                 for c in clientes_conectados:
@@ -69,9 +135,6 @@ def tratar_cliente(con, cliente):
 
     finally:
         with lock:
-            print(conversa_cliente)
-            if conversa_cliente:
-                salvar_conversa(conversa_cliente)
             if con in clientes_conectados:  # Verifica antes de remover
                 clientes_conectados.remove(con)
         con.close()
@@ -83,7 +146,7 @@ def servidor_input():
     global rodando
     while rodando:
         comando = input().strip().lower()
-        if comando.lower() == "quit":
+        if comando == "quit":
             print("[!] Encerrando servidor...")
             rodando = False
             break
