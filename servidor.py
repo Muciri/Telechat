@@ -4,12 +4,14 @@ import threading
 import time
 from structures.LinearProbingLoadFactor import HashTable
 from structures.PilhaEncadeada import Pilha
+from structures.ListaSimplesmenteEncadeada import Lista
 
 TAM_MSG = 1024
 HOST = '0.0.0.0'
 PORT = 40000
 
-clientes_conectados = []
+# clientes_conectados = []
+clientes_conectados = Lista()
 lock = threading.Lock()
 rodando = True
 historico_conversas = HashTable() # Armazena sessões por cliente
@@ -136,7 +138,11 @@ def tratar_cliente(con, cliente):
     finally:
         with lock:
             if con in clientes_conectados:  # Verifica antes de remover
-                clientes_conectados.remove(con)
+                #clientes_conectados.remove(con)
+                try:
+                    clientes_conectados.remover(2) #remove o segundo cliente (o consumidor)
+                except:
+                    clientes_conectados.remover(1) #remove o primeiro cliente (o atendente)
         con.close()
         print(f"Conexão com {cliente} encerrada.")
 

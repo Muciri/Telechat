@@ -35,6 +35,8 @@ Bem-vindo ao projeto **Chat de Atendimento ao Cliente**. Este sistema visa propo
   - **CONNECT**: Do cliente ao servidor, indicando uma conexão. Esta mensagem é feita após um breve cadastro do cliente.
   - **MSG**: Do cliente ao servidor, e vice-versa. Envia (no caso do servidor, redireciona) uma mensagem (o servidor retorna um "+ok mensagem recebida").
   - **QUIT**: Mensagem que pode ser executada tanto pelo cliente quanto pelo servidor, indicando o término de uma conexão.
+  - **Listar usuarios**: do cliente (somente do tipo atendente) para o servidor, solicitando os usuarios. O servidor retorna estes usuarios
+  - **Historico**: do cliente (somente do tipo atendente) para o servidor, solicitando o historico de mensagens do usuário especificado. O servidor retorna estas mensagens
 
 ## Estruturas de Dados: Fila, Pilha e Hash table
 
